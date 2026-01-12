@@ -1,0 +1,844 @@
+import React, { useState, useEffect } from 'react';
+import { Globe, ShieldCheck, Truck, Sprout, Menu, X, Mail, Phone, MapPin, ChevronRight, Award, Factory, Leaf, ChevronDown } from 'lucide-react';
+
+// --- Placeholder Image Components with SVG ---
+const PlaceholderImage = ({ type, alt, className = "" }) => {
+  let content;
+  let bgColor;
+
+  switch (type) {
+    case 'world-map':
+      bgColor = "bg-slate-900";
+      content = (
+        <svg className="w-full h-full opacity-20" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#fff" d="M150,100 Q200,50 250,100 T350,150 T450,100 T550,150 T650,100 T750,150 V300 H50 V150 Q100,200 150,100" />
+          <circle cx="200" cy="150" r="5" fill="#3b82f6" className="animate-pulse" />
+          <circle cx="500" cy="120" r="5" fill="#3b82f6" className="animate-pulse delay-75" />
+          <circle cx="650" cy="180" r="5" fill="#3b82f6" className="animate-pulse delay-150" />
+        </svg>
+      );
+      break;
+    case 'jungle':
+      bgColor = "bg-emerald-900";
+      content = (
+        <svg className="w-full h-full opacity-30" viewBox="0 0 400 400" preserveAspectRatio="none">
+           <defs>
+            <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style={{stopColor:'rgb(6, 78, 59)', stopOpacity:1}} />
+              <stop offset="100%" style={{stopColor:'rgb(16, 185, 129)', stopOpacity:1}} />
+            </linearGradient>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#grad1)" />
+          <path d="M0,400 L100,200 L200,400 Z" fill="#047857" />
+          <path d="M150,400 L250,150 L350,400 Z" fill="#065f46" />
+          <path d="M300,400 L400,250 L500,400 Z" fill="#047857" />
+          <circle cx="350" cy="50" r="30" fill="#fbbf24" opacity="0.2" />
+        </svg>
+      );
+      break;
+    case 'machinery':
+      bgColor = "bg-slate-100";
+      content = (
+        <svg className="w-full h-full text-slate-300" viewBox="0 0 200 200">
+           <rect x="20" y="40" width="60" height="120" rx="4" fill="currentColor" />
+           <rect x="90" y="40" width="90" height="80" rx="4" fill="currentColor" />
+           <circle cx="135" cy="80" r="20" fill="white" opacity="0.5" />
+           <rect x="100" y="130" width="70" height="30" rx="2" fill="currentColor" />
+        </svg>
+      );
+      break;
+    case 'container':
+      bgColor = "bg-blue-900";
+      content = (
+        <svg className="w-full h-full opacity-40" viewBox="0 0 400 300" preserveAspectRatio="none">
+          <rect x="50" y="150" width="100" height="100" fill="#1e3a8a" />
+          <rect x="160" y="120" width="100" height="130" fill="#dc2626" />
+          <rect x="270" y="140" width="100" height="110" fill="#ca8a04" />
+          <line x1="0" y1="260" x2="400" y2="260" stroke="#64748b" strokeWidth="10" />
+        </svg>
+      );
+      break;
+    default:
+      bgColor = "bg-gray-200";
+  }
+
+  return (
+    <div className={`relative overflow-hidden ${bgColor} ${className} flex items-center justify-center`}>
+      {content}
+      <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+        <span className="text-white/80 font-bold text-lg uppercase tracking-widest px-4 py-2 bg-black/30 backdrop-blur-sm rounded">
+          {alt}
+        </span>
+      </div>
+    </div>
+  );
+};
+
+// --- Translations ---
+const translations = {
+  en: {
+    nav: { about: "About", business: "Business", products: "Products", company: "Company", contact: "Contact", inquire: "Inquire" },
+    hero: {
+      badge: "Global Health Solutions from Japan",
+      title: "Reliable Wellness for People & Pets Worldwide.",
+      desc: "Delivering evidence-based, high-quality health products from Japan to the global market.",
+      btnProducts: "Our Products",
+      btnProfile: "Corporate Profile"
+    },
+    about: {
+      badge: "Our Vision",
+      title1: "Contributing to a",
+      title2: "Healthier World",
+      vision: "Our mission is to support the happy lives of people and pets around the world by planning and providing health foods using evidence-based ingredients.",
+      desc: "From sourcing rare ingredients like Tomato Lycopene from Israel to exploring the depths of nature for new discoveries, we bridge the gap between nature's gifts and modern health needs.",
+      imgBadge: "Exploring the World",
+      imgDesc: "CEO has visited 15+ countries to discover the finest raw materials.",
+      stat1: "Years Exp.",
+      stat2: "Countries Visited",
+      stat3: "Reliability"
+    },
+    business: {
+      title: "Our Core Strengths",
+      desc: "We combine Japanese manufacturing quality with global logistical capabilities to deliver safety and speed.",
+      strength1: {
+        title: "Planning & Manufacturing (OEM/ODM)",
+        desc: "Made in Japan quality. We provide speedy planning and manufacturing of safe and secure products based on scientific evidence.",
+        li1: "High Quality Control",
+        li2: "Evidence-based Formulations"
+      },
+      strength2: {
+        title: "Global Trade & Marketing",
+        desc: "Exporting reliable Japanese health foods to Asian markets including China, Taiwan, Vietnam, Cambodia, and Myanmar.",
+        li1: "Cross-border Logistics",
+        li2: "Asian Market Expertise"
+      }
+    },
+    products: {
+      badge: "Product Lineup",
+      title: "Premium Ingredients",
+      desc: "We handle a wide range of functional ingredients and finished products tailored to global needs."
+    },
+    company: {
+      badge: "Leadership",
+      title: "Representative's Background",
+      desc1: "Starting with the import and sales of Tomato Lycopene from Israel—unknown at the time—our representative has over 20 years of experience in OEM/ODM sales at a pharmaceutical group's health food manufacturer.",
+      desc2: "He has visited 15 countries including Norway, Sweden, Israel, Germany, India, USA, and New Zealand to explore the best health food ingredients, serving as a Sales Manager in the Healthcare Division.",
+      tags: ["Global Sourcing", "20 Years Exp", "Pharmaceutical Group BG"]
+    },
+    footer: {
+      desc: "Supporting the health of people and pets worldwide with safe, evidence-based Japanese products.",
+      companyInfo: "Company Info",
+      address: "7-13-11 Shibayama, Funabashi City, Chiba Prefecture, Japan",
+      capital: "Capital: 5 Million JPY",
+      business: "Business",
+      links: ["Health Food Planning & Sales", "OEM/ODM Manufacturing", "Import/Export Trade", "Consulting"]
+    }
+  },
+  ja: {
+    nav: { about: "ビジョン", business: "事業内容", products: "製品一覧", company: "会社概要", contact: "お問い合わせ", inquire: "お問い合わせ" },
+    hero: {
+      badge: "日本発のグローバルヘルスソリューション",
+      title: "世界中の人とペットに信頼できる健康を。",
+      desc: "エビデンスに基づいた安心・安全な日本の健康食品を、スピード感を持って世界へお届けします。",
+      btnProducts: "製品一覧を見る",
+      btnProfile: "会社案内"
+    },
+    about: {
+      badge: "ビジョン",
+      title1: "より健康な世界への",
+      title2: "貢献",
+      vision: "エビデンスに基づいた原料を使用した健康食品を企画して、世界の人々やペットの健康に寄与し、幸せな生活をサポートします。",
+      desc: "イスラエルからのトマトリコピン輸入をはじめ、世界中を飛び回り、まだ見ぬ優れた健康素材を探求しています。自然の恵みと現代の健康ニーズの架け橋となります。",
+      imgBadge: "世界を探求する",
+      imgDesc: "代表は15カ国以上を訪問し、最高品質の原料を発掘してきました。",
+      stat1: "年の実績",
+      stat2: "訪問国数",
+      stat3: "信頼性"
+    },
+    business: {
+      title: "愛和薬品の強み",
+      desc: "日本の製造品質とグローバルな物流ネットワークを組み合わせ、安全とスピードを提供します。",
+      strength1: {
+        title: "企画・製造 (OEM/ODM)",
+        desc: "Made in Japanの品質。科学的根拠に基づいた安心・安全な製品を、スピード感を持って企画・製造します。",
+        li1: "徹底した品質管理",
+        li2: "エビデンスに基づく処方"
+      },
+      strength2: {
+        title: "貿易・マーケティング",
+        desc: "中国、台湾、ベトナム、カンボジア、ミャンマーなど、アジア市場に向けて信頼性の高い日本の健康食品を輸出しています。",
+        li1: "クロスボーダー物流",
+        li2: "アジア市場への専門知識"
+      }
+    },
+    products: {
+      badge: "取扱商品",
+      title: "厳選された原料・製品",
+      desc: "グローバルなニーズに合わせた機能性原料や完成品を幅広く取り扱っています。"
+    },
+    company: {
+      badge: "代表経歴",
+      title: "経営者の背景",
+      desc1: "食品原料の輸入商社を経て、当時無名だったトマトリコピンをイスラエルから輸入販売。その後、製薬会社グループの健康食品メーカーでOEM/ODM営業として20年の実績を持ちます。",
+      desc2: "ノルウェー、スウェーデン、イスラエル、ドイツ、インド、米国など世界15カ国を訪問し、素材を探索。ヘルスケア事業部の営業部長としての経験を活かし、事業を展開しています。",
+      tags: ["グローバルソーシング", "20年の実績", "製薬グループ出身"]
+    },
+    footer: {
+      desc: "エビデンスに基づいた安心・安全な日本の製品で、世界中の人とペットの健康をサポートします。",
+      companyInfo: "会社情報",
+      address: "千葉県船橋市芝山7-13-11",
+      capital: "資本金：500万円",
+      business: "事業内容",
+      links: ["健康食品の企画・販売", "OEM/ODM製造", "輸出入貿易業", "コンサルティング"]
+    }
+  },
+  zh: { // Simplified Chinese
+    nav: { about: "愿景", business: "业务内容", products: "产品列表", company: "公司简介", contact: "联系我们", inquire: "咨询" },
+    hero: {
+      badge: "源自日本的全球健康方案",
+      title: "为全球的人与宠物带来值得信赖的健康。",
+      desc: "将基于科学依据、安全放心的日本健康食品，迅速送达世界各地。",
+      btnProducts: "查看产品",
+      btnProfile: "公司简介"
+    },
+    about: {
+      badge: "企业愿景",
+      title1: "致力于构建",
+      title2: "更健康的世界",
+      vision: "策划使用基于科学依据的原料的健康食品，为世界人民和宠物的健康做出贡献，支持幸福生活。",
+      desc: "从引进以色列的番茄红素开始，我们走遍世界，探索尚未被发现的优质健康素材。成为大自然的馈赠与现代健康需求之间的桥梁。",
+      imgBadge: "探索世界",
+      imgDesc: "CEO已访问超过15个国家，发掘最优质的原料。",
+      stat1: "年经验",
+      stat2: "访问国家",
+      stat3: "可靠性"
+    },
+    business: {
+      title: "我们的核心优势",
+      desc: "结合日本的制造品质与全球物流网络，提供安全与速度。",
+      strength1: {
+        title: "策划与制造 (OEM/ODM)",
+        desc: "日本制造的品质。我们基于科学依据，快速策划并制造安全放心的产品。",
+        li1: "严格的质量管理",
+        li2: "基于证据的配方"
+      },
+      strength2: {
+        title: "全球贸易与营销",
+        desc: "向中国、台湾、越南、柬埔寨、缅甸等亚洲市场出口值得信赖的日本健康食品。",
+        li1: "跨境物流",
+        li2: "亚洲市场专长"
+      }
+    },
+    products: {
+      badge: "产品系列",
+      title: "精选原料",
+      desc: "我们经营各种适应全球需求的功能性原料和成品。"
+    },
+    company: {
+      badge: "领导层",
+      title: "代表经历",
+      desc1: "经历食品原料进口商社后，从以色列进口并销售当时鲜为人知的番茄红素。之后在制药集团旗下的健康食品制造商拥有20年的OEM/ODM销售实绩。",
+      desc2: "曾作为医疗保健事业部的营业部长，访问挪威、瑞典、以色列、德国、印度、美国等15个国家，探索健康食品素材。",
+      tags: ["全球采购", "20年经验", "制药集团背景"]
+    },
+    footer: {
+      desc: "用安全、基于证据的日本产品支持全世界人和宠物的健康。",
+      companyInfo: "公司信息",
+      address: "日本千叶县船桥市芝山7-13-11",
+      capital: "资本金：500万日元",
+      business: "业务范围",
+      links: ["健康食品策划与销售", "OEM/ODM制造", "进出口贸易", "咨询"]
+    }
+  },
+  vi: { // Vietnamese
+    nav: { about: "Tầm nhìn", business: "Kinh doanh", products: "Sản phẩm", company: "Công ty", contact: "Liên hệ", inquire: "Yêu cầu" },
+    hero: {
+      badge: "Giải pháp Sức khỏe Toàn cầu từ Nhật Bản",
+      title: "Sức khỏe Tin cậy cho Người & Thú cưng Toàn cầu.",
+      desc: "Cung cấp các sản phẩm sức khỏe chất lượng cao, dựa trên bằng chứng khoa học từ Nhật Bản ra thị trường thế giới.",
+      btnProducts: "Sản phẩm của chúng tôi",
+      btnProfile: "Hồ sơ công ty"
+    },
+    about: {
+      badge: "Tầm nhìn",
+      title1: "Đóng góp cho một",
+      title2: "Thế giới Khỏe mạnh hơn",
+      vision: "Nhiệm vụ của chúng tôi là hỗ trợ cuộc sống hạnh phúc của mọi người và thú cưng trên toàn thế giới bằng cách lập kế hoạch và cung cấp thực phẩm tốt cho sức khỏe sử dụng các thành phần dựa trên bằng chứng.",
+      desc: "Từ việc tìm nguồn nguyên liệu quý hiếm như Tomato Lycopene từ Israel đến khám phá thiên nhiên để tìm ra những phát hiện mới.",
+      imgBadge: "Khám phá Thế giới",
+      imgDesc: "CEO đã đến thăm hơn 15 quốc gia để khám phá những nguyên liệu thô tốt nhất.",
+      stat1: "Năm kinh nghiệm",
+      stat2: "Quốc gia đã đến",
+      stat3: "Độ tin cậy"
+    },
+    business: {
+      title: "Thế mạnh cốt lõi",
+      desc: "Chúng tôi kết hợp chất lượng sản xuất Nhật Bản với khả năng hậu cần toàn cầu.",
+      strength1: {
+        title: "Lập kế hoạch & Sản xuất (OEM/ODM)",
+        desc: "Chất lượng Made in Japan. Chúng tôi cung cấp kế hoạch nhanh chóng và sản xuất các sản phẩm an toàn dựa trên bằng chứng khoa học.",
+        li1: "Kiểm soát chất lượng cao",
+        li2: "Công thức dựa trên bằng chứng"
+      },
+      strength2: {
+        title: "Thương mại & Tiếp thị Toàn cầu",
+        desc: "Xuất khẩu thực phẩm sức khỏe Nhật Bản đáng tin cậy sang các thị trường châu Á bao gồm Trung Quốc, Đài Loan, Việt Nam, Campuchia và Myanmar.",
+        li1: "Hậu cần xuyên biên giới",
+        li2: "Chuyên môn thị trường châu Á"
+      }
+    },
+    products: {
+      badge: "Dòng sản phẩm",
+      title: "Nguyên liệu cao cấp",
+      desc: "Chúng tôi xử lý nhiều loại nguyên liệu chức năng và thành phẩm phù hợp với nhu cầu toàn cầu."
+    },
+    company: {
+      badge: "Lãnh đạo",
+      title: "Tiểu sử Đại diện",
+      desc1: "Bắt đầu với việc nhập khẩu và bán Tomato Lycopene từ Israel, đại diện của chúng tôi có hơn 20 năm kinh nghiệm kinh doanh OEM/ODM tại một nhà sản xuất thực phẩm sức khỏe thuộc tập đoàn dược phẩm.",
+      desc2: "Ông đã đến thăm 15 quốc gia bao gồm Na Uy, Thụy Điển, Israel, Đức, Ấn Độ, Mỹ và New Zealand để khám phá các thành phần thực phẩm sức khỏe tốt nhất.",
+      tags: ["Nguồn cung ứng toàn cầu", "20 năm kinh nghiệm", "Nền tảng tập đoàn dược phẩm"]
+    },
+    footer: {
+      desc: "Hỗ trợ sức khỏe của mọi người và thú cưng trên toàn thế giới với các sản phẩm Nhật Bản an toàn, dựa trên bằng chứng.",
+      companyInfo: "Thông tin công ty",
+      address: "7-13-11 Shibayama, Funabashi, Chiba, Nhật Bản",
+      capital: "Vốn: 5 triệu Yên",
+      business: "Kinh doanh",
+      links: ["Lập kế hoạch & Bán hàng", "Sản xuất OEM/ODM", "Thương mại Xuất nhập khẩu", "Tư vấn"]
+    }
+  },
+  th: { // Thai
+    nav: { about: "วิสัยทัศน์", business: "ธุรกิจ", products: "สินค้า", company: "บริษัท", contact: "ติดต่อ", inquire: "สอบถาม" },
+    hero: {
+      badge: "โซลูชั่นสุขภาพระดับโลกจากญี่ปุ่น",
+      title: "สุขภาพที่เชื่อถือได้สำหรับผู้คนและสัตว์เลี้ยงทั่วโลก",
+      desc: "ส่งมอบผลิตภัณฑ์สุขภาพคุณภาพสูงที่มีหลักฐานอ้างอิงจากญี่ปุ่นสู่ตลาดโลก",
+      btnProducts: "ผลิตภัณฑ์ของเรา",
+      btnProfile: "ข้อมูลบริษัท"
+    },
+    about: {
+      badge: "วิสัยทัศน์ของเรา",
+      title1: "มุ่งมั่นสู่",
+      title2: "โลกที่มีสุขภาพดีขึ้น",
+      vision: "ภารกิจของเราคือการสนับสนุนชีวิตที่มีความสุขของผู้คนและสัตว์เลี้ยงทั่วโลก โดยการวางแผนและจัดหาอาหารเพื่อสุขภาพโดยใช้ส่วนผสมที่มีหลักฐานอ้างอิง",
+      desc: "จากการสรรหาวัตถุดิบหายากเช่น Tomato Lycopene จากอิสราเอล ไปจนถึงการสำรวจธรรมชาติเพื่อการค้นพบใหม่ๆ",
+      imgBadge: "สำรวจโลก",
+      imgDesc: "CEO ได้ไปเยือนกว่า 15 ประเทศเพื่อค้นหาวัตถุดิบที่ดีที่สุด",
+      stat1: "ปีประสบการณ์",
+      stat2: "ประเทศที่ไปเยือน",
+      stat3: "ความน่าเชื่อถือ"
+    },
+    business: {
+      title: "จุดแข็งของเรา",
+      desc: "เราผสานคุณภาพการผลิตแบบญี่ปุ่นเข้ากับความสามารถด้านโลจิสติกส์ระดับโลก",
+      strength1: {
+        title: "การวางแผนและการผลิต (OEM/ODM)",
+        desc: "คุณภาพ Made in Japan เราให้บริการวางแผนและผลิตผลิตภัณฑ์ที่ปลอดภัยอย่างรวดเร็วโดยอิงตามหลักฐานทางวิทยาศาสตร์",
+        li1: "การควบคุมคุณภาพสูง",
+        li2: "สูตรที่มีหลักฐานอ้างอิง"
+      },
+      strength2: {
+        title: "การค้าและการตลาดระดับโลก",
+        desc: "ส่งออกอาหารเพื่อสุขภาพของญี่ปุ่นที่เชื่อถือได้ไปยังตลาดเอเชีย รวมถึงจีน ไต้หวัน เวียดนาม กัมพูชา และเมียนมาร์",
+        li1: "โลจิสติกส์ข้ามพรมแดน",
+        li2: "ความเชี่ยวชาญในตลาดเอเชีย"
+      }
+    },
+    products: {
+      badge: "กลุ่มผลิตภัณฑ์",
+      title: "ส่วนผสมพรีเมียม",
+      desc: "เราจัดการส่วนผสมที่มีฟังก์ชันการทำงานและผลิตภัณฑ์สำเร็จรูปที่หลากหลายตามความต้องการระดับโลก"
+    },
+    company: {
+      badge: "ผู้นำ",
+      title: "ประวัติผู้บริหาร",
+      desc1: "เริ่มต้นจากการนำเข้าและขาย Tomato Lycopene จากอิสราเอล ผู้แทนของเรามีประสบการณ์กว่า 20 ปีในการขาย OEM/ODM ที่บริษัทผลิตอาหารเพื่อสุขภาพในเครือบริษัทยา",
+      desc2: "เขาได้ไปเยือน 15 ประเทศ รวมถึงนอร์เวย์ สวีเดน อิสราเอล เยอรมนี อินเดีย สหรัฐอเมริกา และนิวซีแลนด์ เพื่อสำรวจส่วนผสมอาหารเพื่อสุขภาพที่ดีที่สุด",
+      tags: ["การจัดหาระดับโลก", "ประสบการณ์ 20 ปี", "พื้นฐานกลุ่มเภสัชกรรม"]
+    },
+    footer: {
+      desc: "สนับสนุนสุขภาพของผู้คนและสัตว์เลี้ยงทั่วโลกด้วยผลิตภัณฑ์ญี่ปุ่นที่ปลอดภัยและมีหลักฐานอ้างอิง",
+      companyInfo: "ข้อมูลบริษัท",
+      address: "7-13-11 Shibayama, Funabashi, Chiba, Japan",
+      capital: "ทุนจดทะเบียน: 5 ล้านเยน",
+      business: "ธุรกิจ",
+      links: ["การวางแผนและการขายอาหารเพื่อสุขภาพ", "การผลิต OEM/ODM", "ธุรกิจนำเข้าส่งออก", "ที่ปรึกษา"]
+    }
+  },
+  km: { // Khmer (Cambodian)
+    nav: { about: "ចក្ខុវិស័យ", business: "អាជីវកម្ម", products: "ផលិតផល", company: "ក្រុមហ៊ុន", contact: "ទំនាក់ទំនង", inquire: "សាកសួរ" },
+    hero: {
+      badge: "ដំណោះស្រាយសុខភាពសកលពីប្រទេសជប៉ុន",
+      title: "សុខភាពដែលអាចទុកចិត្តបានសម្រាប់មនុស្ស និងសត្វចិញ្ចឹម",
+      desc: "ផ្តល់ជូននូវផលិតផលសុខភាពដែលមានគុណភាពខ្ពស់ និងផ្អែកលើភស្តុតាងពីប្រទេសជប៉ុនទៅកាន់ទីផ្សារពិភពលោក។",
+      btnProducts: "ផលិតផលរបស់យើង",
+      btnProfile: "ប្រវត្តិក្រុមហ៊ុន"
+    },
+    about: {
+      badge: "ចក្ខុវិស័យរបស់យើង",
+      title1: "រួមចំណែកដល់",
+      title2: "ពិភពលោកដែលមានសុខភាពល្អ",
+      vision: "បេសកកម្មរបស់យើងគឺគាំទ្រដល់ជីវិតដ៏រីករាយរបស់មនុស្ស និងសត្វចិញ្ចឹមជុំវិញពិភពលោក ដោយរៀបចំផែនការ និងផ្តល់ជូននូវអាហារសុខភាពដោយប្រើប្រាស់គ្រឿងផ្សំដែលផ្អែកលើភស្តុតាង។",
+      desc: "ពីការស្វែងរកគ្រឿងផ្សំកម្រដូចជា Tomato Lycopene ពីអ៊ីស្រាអែល ទៅការរុករកធម្មជាតិសម្រាប់ការរកឃើញថ្មីៗ។",
+      imgBadge: "រុករកពិភពលោក",
+      imgDesc: "នាយកប្រតិបត្តិបានទៅទស្សនាជាង ១៥ ប្រទេសដើម្បីស្វែងរកវត្ថុធាតុដើមល្អបំផុត។",
+      stat1: "ឆ្នាំនៃបទពិសោធន៍",
+      stat2: "ប្រទេសដែលបានទស្សនា",
+      stat3: "ភាពជឿជាក់"
+    },
+    business: {
+      title: "ចំណុចខ្លាំងរបស់យើង",
+      desc: "យើងរួមបញ្ចូលគ្នានូវគុណភាពផលិតកម្មរបស់ជប៉ុនជាមួយនឹងសមត្ថភាពដឹកជញ្ជូនសកល។",
+      strength1: {
+        title: "ការរៀបចំផែនការ និងផលិតកម្ម (OEM/ODM)",
+        desc: "គុណភាព Made in Japan។ យើងផ្តល់ជូននូវការរៀបចំផែនការ និងផលិតកម្មយ៉ាងឆាប់រហ័សនូវផលិតផលដែលមានសុវត្ថិភាពដោយផ្អែកលើភស្តុតាងវិទ្យាសាស្ត្រ។",
+        li1: "ការត្រួតពិនិត្យគុណភាពខ្ពស់",
+        li2: "រូបមន្តផ្អែកលើភស្តុតាង"
+      },
+      strength2: {
+        title: "ពាណិជ្ជកម្ម និងទីផ្សារសកល",
+        desc: "នាំចេញអាហារសុខភាពជប៉ុនដែលអាចទុកចិត្តបានទៅកាន់ទីផ្សារអាស៊ី រួមមានចិន តៃវ៉ាន់ វៀតណាម កម្ពុជា និងមីយ៉ាន់ម៉ា។",
+        li1: "ការដឹកជញ្ជូនឆ្លងដែន",
+        li2: "ជំនាញទីផ្សារអាស៊ី"
+      }
+    },
+    products: {
+      badge: "ជួរផលិតផល",
+      title: "គ្រឿងផ្សំលំដាប់ខ្ពស់",
+      desc: "យើងគ្រប់គ្រងគ្រឿងផ្សំដែលមានមុខងារ និងផលិតផលសម្រេចជាច្រើនប្រភេទដែលតម្រូវតាមតម្រូវការសកល។"
+    },
+    company: {
+      badge: "ភាពជាអ្នកដឹកនាំ",
+      title: "ប្រវត្តិអ្នកតំណាង",
+      desc1: "ចាប់ផ្តើមជាមួយនឹងការនាំចូល និងលក់ Tomato Lycopene ពីអ៊ីស្រាអែល តំណាងរបស់យើងមានបទពិសោធន៍ជាង ២០ ឆ្នាំក្នុងការលក់ OEM/ODM នៅក្រុមហ៊ុនផលិតអាហារសុខភាពរបស់សម្ព័ន្ធឱសថ។",
+      desc2: "គាត់បានទៅទស្សនា ១៥ ប្រទេស រួមមាន ន័រវែស ស៊ុយអែត អ៊ីស្រាអែល អាល្លឺម៉ង់ ឥណ្ឌា សហរដ្ឋអាមេរិក និងនូវែលសេឡង់។",
+      tags: ["ប្រភពសកល", "បទពិសោធន៍ ២០ ឆ្នាំ", "ផ្ទៃខាងក្រោយក្រុមឱសថ"]
+    },
+    footer: {
+      desc: "គាំទ្រសុខភាពរបស់មនុស្ស និងសត្វចិញ្ចឹមជុំវិញពិភពលោកជាមួយនឹងផលិតផលជប៉ុនដែលមានសុវត្ថិភាព និងផ្អែកលើភស្តុតាង។",
+      companyInfo: "ព័ត៌មានក្រុមហ៊ុន",
+      address: "7-13-11 Shibayama, Funabashi, Chiba, Japan",
+      capital: "ដើមទុន៖ ៥ លានយ៉េន",
+      business: "អាជីវកម្ម",
+      links: ["ការរៀបចំផែនការ និងលក់អាហារសុខភាព", "ការផលិត OEM/ODM", "ពាណិជ្ជកម្មនាំចេញនាំចូល", "ការប្រឹក្សា"]
+    }
+  }
+};
+
+const productList = {
+  en: [
+    "Manuka Honey", "Fucoidan", "NMN", "Lutein", "Charcoal", 
+    "Omega-3 Fatty Acids", "Anserine", "Andrographis", "Sunfiber", "PQQ"
+  ],
+  ja: [
+    "マヌカハニー", "フコイダン", "NMN", "ルテイン", "炭", 
+    "オメガ3脂肪酸", "アンセリン", "センシンレン", "サンファイバー", "PQQ"
+  ],
+  zh: [
+    "麦卢卡蜂蜜", "褐藻糖胶", "NMN", "叶黄素", "活性炭", 
+    "Omega-3脂肪酸", "鹅肌肽", "穿心莲", "太阳纤维", "PQQ"
+  ],
+  vi: [
+    "Mật ong Manuka", "Fucoidan", "NMN", "Lutein", "Than hoạt tính", 
+    "Axit béo Omega-3", "Anserine", "Xuyên tâm liên", "Sunfiber", "PQQ"
+  ],
+  th: [
+    "น้ำผึ้งมานู *** ", "ฟูкоиแดน", "NMN", "ลูทีน", "ถ่านชาร์โคล", 
+    "กรดไขมันโอเมก้า 3", "แอนเซอรีน", "ฟ้าทะลายโจร", "ซันไฟเบอร์", "PQQ"
+  ],
+  km: [
+    "ទឹកឃ្មុំ Manuka", "Fucoidan", "NMN", "Lutein", "ធ្យូង", 
+    "អាស៊ីតខ្លាញ់អូមេហ្គា-៣", "Anserine", "Andrographis", "Sunfiber", "PQQ"
+  ]
+};
+
+const languages = [
+  { code: 'ja', name: '日本語', flag: '🇯🇵' },
+  { code: 'en', name: 'English', flag: '🇺🇸' },
+  { code: 'zh', name: '中文', flag: '🇨🇳' },
+  { code: 'vi', name: 'Tiếng Việt', flag: '🇻🇳' },
+  { code: 'th', name: 'ไทย', flag: '🇹🇭' },
+  { code: 'km', name: 'ខ្មែរ', flag: '🇰🇭' },
+];
+
+export default function AiwayakuhinGlobalSite() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [currentLang, setCurrentLang] = useState('ja'); // Default to Japanese
+  const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
+
+  const t = translations[currentLang];
+  const pList = productList[currentLang] || productList['en'];
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const toggleLang = (code) => {
+    setCurrentLang(code);
+    setIsLangMenuOpen(false);
+    setIsMenuOpen(false);
+  };
+
+  return (
+    <div className={`min-h-screen font-sans text-slate-800 bg-white ${currentLang === 'km' || currentLang === 'th' ? 'font-noto' : ''}`}>
+      {/* Navigation */}
+      <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'bg-white shadow-md py-4' : 'bg-transparent py-6'}`}>
+        <div className="container mx-auto px-6 flex justify-between items-center">
+          <div className={`text-2xl font-bold tracking-tighter ${scrolled ? 'text-blue-900' : 'text-white'}`}>
+            AIWAYAKUHIN <span className="font-light text-sm block md:inline md:ml-2 opacity-80">Co., Ltd.</span>
+          </div>
+          
+          <div className="hidden md:flex items-center space-x-8">
+            {Object.entries(t.nav).filter(([key]) => key !== 'inquire').map(([key, label]) => (
+              <a 
+                key={key} 
+                href={`#${key}`} 
+                className={`text-sm font-medium hover:text-blue-500 transition-colors ${scrolled ? 'text-slate-600' : 'text-white/90'}`}
+              >
+                {label}
+              </a>
+            ))}
+
+            {/* Language Selector Desktop */}
+            <div className="relative">
+              <button 
+                onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-colors ${scrolled ? 'border-slate-300 text-slate-700 hover:bg-slate-50' : 'border-white/30 text-white hover:bg-white/10'}`}
+              >
+                <Globe size={16} />
+                <span className="text-xs font-bold uppercase">{languages.find(l => l.code === currentLang).code}</span>
+                <ChevronDown size={14} />
+              </button>
+              
+              {isLangMenuOpen && (
+                <div className="absolute top-full right-0 mt-2 w-40 bg-white rounded-lg shadow-xl border border-slate-100 overflow-hidden py-1">
+                  {languages.map((lang) => (
+                    <button
+                      key={lang.code}
+                      onClick={() => toggleLang(lang.code)}
+                      className={`w-full text-left px-4 py-2 text-sm flex items-center gap-3 hover:bg-blue-50 transition-colors ${currentLang === lang.code ? 'bg-blue-50 text-blue-600 font-bold' : 'text-slate-600'}`}
+                    >
+                      <span className="text-lg">{lang.flag}</span> {lang.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <button className="bg-blue-600 text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-blue-700 transition shadow-lg flex items-center gap-2">
+              <Mail size={16} /> {t.nav.inquire}
+            </button>
+          </div>
+
+          <div className="md:hidden flex items-center gap-4">
+            {/* Language Selector Mobile Toggle (Simple) */}
+            <button 
+              onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
+              className={`flex items-center gap-1 ${scrolled ? 'text-slate-800' : 'text-white'}`}
+            >
+              <Globe size={20} />
+              <span className="text-xs font-bold uppercase">{currentLang}</span>
+            </button>
+
+            <button 
+              className={`${scrolled ? 'text-slate-800' : 'text-white'}`}
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              {isMenuOpen ? <X /> : <Menu />}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Language Menu (Overlay) */}
+        {isLangMenuOpen && (
+            <div className="absolute top-16 right-6 w-48 bg-white rounded-lg shadow-xl border border-slate-100 z-50 md:hidden">
+               {languages.map((lang) => (
+                <button
+                  key={lang.code}
+                  onClick={() => toggleLang(lang.code)}
+                  className={`w-full text-left px-4 py-3 text-sm flex items-center gap-3 hover:bg-blue-50 border-b border-slate-50 last:border-0 ${currentLang === lang.code ? 'bg-blue-50 text-blue-600 font-bold' : 'text-slate-600'}`}
+                >
+                  <span className="text-lg">{lang.flag}</span> {lang.name}
+                </button>
+              ))}
+            </div>
+        )}
+
+        {/* Mobile Menu */}
+        {isMenuOpen && (
+          <div className="absolute top-full left-0 w-full bg-white shadow-xl py-6 px-6 md:hidden flex flex-col space-y-4">
+            {Object.entries(t.nav).filter(([key]) => key !== 'inquire').map(([key, label]) => (
+              <a 
+                key={key} 
+                href={`#${key}`}
+                className="text-slate-600 font-medium py-2 border-b border-slate-100"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {label}
+              </a>
+            ))}
+             <button className="bg-blue-600 text-white px-5 py-3 rounded-full text-sm font-semibold hover:bg-blue-700 transition shadow-lg flex items-center justify-center gap-2 w-full mt-4">
+              <Mail size={16} /> {t.nav.inquire}
+            </button>
+          </div>
+        )}
+      </nav>
+
+      {/* Hero Section */}
+      <header className="relative h-screen flex items-center justify-center overflow-hidden">
+        {/* Background Image: World Map Abstract */}
+        <div className="absolute inset-0 z-0">
+          <PlaceholderImage type="world-map" alt="Global Network" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-900/80 to-slate-900/60 mix-blend-multiply" />
+        </div>
+
+        <div className="relative z-10 container mx-auto px-6 text-center md:text-left">
+          <div className="inline-block bg-blue-500/20 backdrop-blur-sm border border-blue-400/30 rounded-full px-4 py-1 text-blue-100 text-sm font-medium mb-6 animate-fade-in-up">
+            {t.hero.badge}
+          </div>
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6 max-w-4xl">
+            {t.hero.title}
+          </h1>
+          <p className="text-lg md:text-xl text-slate-200 mb-10 max-w-2xl font-light">
+            {t.hero.desc}
+          </p>
+          <div className="flex flex-col md:flex-row gap-4 justify-center md:justify-start">
+            <button className="bg-blue-600 text-white px-8 py-4 rounded-full font-bold hover:bg-blue-700 transition flex items-center justify-center gap-2 shadow-lg hover:shadow-blue-500/25">
+              {t.hero.btnProducts} <ChevronRight size={18} />
+            </button>
+            <button className="bg-white/10 backdrop-blur text-white border border-white/30 px-8 py-4 rounded-full font-bold hover:bg-white/20 transition">
+              {t.hero.btnProfile}
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Vision Section: Amazon Jungle Imagery */}
+      <section id="about" className="py-24 bg-slate-50 relative overflow-hidden">
+        <div className="container mx-auto px-6">
+          <div className="grid md:grid-cols-2 gap-16 items-center">
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl h-[500px]">
+              {/* Image: Amazon Jungle - Representing exploration of raw materials */}
+              <PlaceholderImage type="jungle" alt={t.about.imgBadge} className="w-full h-full object-cover transform hover:scale-105 transition duration-700" />
+              <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/80 to-transparent text-white">
+                <p className="font-semibold text-emerald-300 mb-2">{t.about.imgBadge}</p>
+                <p className="text-sm opacity-90">{t.about.imgDesc}</p>
+              </div>
+            </div>
+            
+            <div>
+              <div className="flex items-center gap-2 text-blue-600 font-bold mb-4">
+                <Sprout size={24} />
+                <span className="uppercase tracking-wider text-sm">{t.about.badge}</span>
+              </div>
+              <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-8 leading-tight">
+                {t.about.title1} <br/>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-emerald-600">{t.about.title2}</span>
+              </h2>
+              <div className="space-y-6 text-slate-600 text-lg leading-relaxed">
+                <p className="font-semibold text-slate-800">
+                  {t.about.vision}
+                </p>
+                <p>
+                  {t.about.desc}
+                </p>
+              </div>
+
+              <div className="mt-10 grid grid-cols-3 gap-6 border-t border-slate-200 pt-8">
+                <div>
+                  <h3 className="text-3xl font-bold text-blue-900">20<span className="text-sm">+</span></h3>
+                  <p className="text-sm text-slate-500">{t.about.stat1}</p>
+                </div>
+                <div>
+                  <h3 className="text-3xl font-bold text-blue-900">15<span className="text-sm">+</span></h3>
+                  <p className="text-sm text-slate-500">{t.about.stat2}</p>
+                </div>
+                <div>
+                  <h3 className="text-3xl font-bold text-blue-900">100<span className="text-sm">%</span></h3>
+                  <p className="text-sm text-slate-500">{t.about.stat3}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Business & Strengths */}
+      <section id="business" className="py-24 bg-white">
+        <div className="container mx-auto px-6">
+          <div className="text-center max-w-3xl mx-auto mb-20">
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">{t.business.title}</h2>
+            <p className="text-slate-600">
+              {t.business.desc}
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
+            {/* Strength 1: Manufacturing */}
+            <div className="group rounded-2xl border border-slate-100 shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300">
+              <div className="h-64 relative">
+                 {/* Image: Supplement Manufacturing Machinery */}
+                 <PlaceholderImage type="machinery" alt="High-Tech Manufacturing" className="w-full h-full object-cover" />
+                 <div className="absolute top-4 right-4 bg-white/90 backdrop-blur p-2 rounded-lg shadow-sm">
+                    <Factory className="text-blue-600" size={24} />
+                 </div>
+              </div>
+              <div className="p-8">
+                <h3 className="text-2xl font-bold text-slate-900 mb-3">{t.business.strength1.title}</h3>
+                <p className="text-slate-600 mb-4">
+                  {t.business.strength1.desc}
+                </p>
+                <ul className="space-y-2">
+                  <li className="flex items-center gap-2 text-sm text-slate-700">
+                    <ShieldCheck size={16} className="text-emerald-500" /> {t.business.strength1.li1}
+                  </li>
+                  <li className="flex items-center gap-2 text-sm text-slate-700">
+                    <ShieldCheck size={16} className="text-emerald-500" /> {t.business.strength1.li2}
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Strength 2: Logistics & Trade */}
+            <div className="group rounded-2xl border border-slate-100 shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300">
+              <div className="h-64 relative">
+                 {/* Image: Container Yard / Port */}
+                 <PlaceholderImage type="container" alt="Global Logistics" className="w-full h-full object-cover" />
+                 <div className="absolute top-4 right-4 bg-white/90 backdrop-blur p-2 rounded-lg shadow-sm">
+                    <Globe className="text-blue-600" size={24} />
+                 </div>
+              </div>
+              <div className="p-8">
+                <h3 className="text-2xl font-bold text-slate-900 mb-3">{t.business.strength2.title}</h3>
+                <p className="text-slate-600 mb-4">
+                  {t.business.strength2.desc}
+                </p>
+                <ul className="space-y-2">
+                  <li className="flex items-center gap-2 text-sm text-slate-700">
+                    <Truck size={16} className="text-blue-500" /> {t.business.strength2.li1}
+                  </li>
+                  <li className="flex items-center gap-2 text-sm text-slate-700">
+                    <Truck size={16} className="text-blue-500" /> {t.business.strength2.li2}
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Products Section */}
+      <section id="products" className="py-24 bg-slate-900 text-white">
+        <div className="container mx-auto px-6">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-16">
+            <div>
+              <span className="text-blue-400 font-bold tracking-wider uppercase text-sm">{t.products.badge}</span>
+              <h2 className="text-3xl md:text-4xl font-bold mt-2">{t.products.title}</h2>
+            </div>
+            <p className="text-slate-400 max-w-md mt-4 md:mt-0">
+              {t.products.desc}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {pList.map((item, index) => (
+              <div key={index} className="bg-slate-800/50 border border-slate-700 rounded-xl p-6 hover:bg-slate-700/50 hover:border-blue-500/50 transition duration-300 flex flex-col items-center text-center group">
+                <div className="w-12 h-12 bg-blue-500/10 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition">
+                  <Leaf className="text-blue-400" size={24} />
+                </div>
+                <h3 className="font-medium text-slate-200 text-sm">{item}</h3>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CEO Profile */}
+      <section id="company" className="py-24 bg-slate-50">
+        <div className="container mx-auto px-6">
+          <div className="bg-white rounded-3xl p-8 md:p-12 shadow-xl flex flex-col md:flex-row gap-12 items-center">
+            <div className="md:w-1/3">
+              <div className="w-48 h-48 md:w-64 md:h-64 bg-slate-200 rounded-full mx-auto overflow-hidden relative border-4 border-white shadow-lg">
+                <div className="absolute inset-0 flex items-center justify-center bg-slate-300 text-slate-500">
+                  <span className="text-4xl">CEO</span>
+                </div>
+              </div>
+            </div>
+            <div className="md:w-2/3">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-bold uppercase mb-4">
+                <Award size={14} /> {t.company.badge}
+              </div>
+              <h2 className="text-3xl font-bold text-slate-900 mb-4">{t.company.title}</h2>
+              <p className="text-slate-600 mb-6 leading-relaxed">
+                {t.company.desc1}
+              </p>
+              <p className="text-slate-600 mb-6 leading-relaxed">
+                {t.company.desc2}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                 {t.company.tags.map(tag => (
+                   <span key={tag} className="px-3 py-1 bg-slate-100 text-slate-600 text-xs rounded-md border border-slate-200">{tag}</span>
+                 ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer id="contact" className="bg-slate-950 text-slate-400 py-16 border-t border-slate-900">
+        <div className="container mx-auto px-6 grid md:grid-cols-4 gap-12">
+          <div className="col-span-1 md:col-span-2">
+            <h3 className="text-2xl font-bold text-white mb-4">AIWAYAKUHIN Co., Ltd.</h3>
+            <p className="mb-6 max-w-sm">
+              {t.footer.desc}
+            </p>
+            <div className="flex space-x-4">
+              {/* Social placeholders */}
+              <div className="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center hover:bg-blue-600 hover:text-white transition cursor-pointer">In</div>
+              <div className="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center hover:bg-blue-600 hover:text-white transition cursor-pointer">Fb</div>
+            </div>
+          </div>
+          
+          <div>
+            <h4 className="text-white font-bold mb-6">{t.footer.companyInfo}</h4>
+            <ul className="space-y-4 text-sm">
+              <li className="flex items-start gap-3">
+                <MapPin className="mt-1 shrink-0 text-blue-500" size={16} />
+                <span>
+                  {t.footer.address}
+                </span>
+              </li>
+              <li className="flex items-center gap-3">
+                <Phone className="shrink-0 text-blue-500" size={16} />
+                <span>+81-80-5749-0033</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <Factory className="shrink-0 text-blue-500" size={16} />
+                <span>{t.footer.capital}</span>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-white font-bold mb-6">{t.footer.business}</h4>
+            <ul className="space-y-2 text-sm">
+              {t.footer.links.map((link, idx) => (
+                <li key={idx}><a href="#" className="hover:text-blue-400 transition">{link}</a></li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        <div className="container mx-auto px-6 mt-16 pt-8 border-t border-slate-900 text-center text-xs">
+          <p>&copy; {new Date().getFullYear()} AIWAYAKUHIN Co., Ltd. All Rights Reserved.</p>
+        </div>
+      </footer>
+    </div>
+  );
+}
